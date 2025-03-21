@@ -1,0 +1,30 @@
+name: Daily PowerShell Script
+
+on:
+  schedule:
+    # This runs at 00:00 UTC every day
+    # Use https://crontab.guru/ to customize the schedule
+    - cron: '0 0 * * *'
+  # Optional: Allows you to manually trigger the workflow from GitHub
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: windows-latest  # Use windows runner for PowerShell
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Set up PowerShell
+        shell: pwsh
+        # Use this step for any PowerShell setup you might need
+        
+      - name: Run PowerShell script
+        shell: pwsh
+        run: |
+          # Path to your script file in the repository
+          .\AnaplanDailyAction.ps1
+          
+          # If your script needs parameters, add them like this:
+          # .\your-script-name.ps1 -Parameter1 Value1 -Parameter2 Value2
