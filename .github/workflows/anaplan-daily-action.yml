@@ -23,10 +23,10 @@ jobs:
       - name: Download and setup Anaplan Connect
         run: |
           # Download Anaplan Connect
-          Invoke-WebRequest -Uri "https://cdn.anaplan.com/anaplan-connect/4.3.1/anaplan-connect-4.3.1.zip" -OutFile "anaplan-connect.zip"
+          Invoke-WebRequest -Uri "https://anaplanenablement.s3.amazonaws.com/Community/Anapedia/anaplan-connect-4.3.1.zip" -OutFile "anaplan-connect-4.3.1.zip"
           
           # Extract to a specific directory
-          Expand-Archive -Path "anaplan-connect.zip" -DestinationPath "anaplan-connect-4.3.1"
+          Expand-Archive -Path "anaplan-connect-4.3.1.zip" -DestinationPath "anaplan-connect-4.3.1"
           
           # Create logs directory
           New-Item -ItemType Directory -Path "logs" -Force
