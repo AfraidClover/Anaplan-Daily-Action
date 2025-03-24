@@ -1,7 +1,8 @@
 # AnaplanDailyAction.ps1
 # This script runs an Anaplan action and logs the outcome
+
 # ------ Configuration ------
-# Anaplan credentials - keeping as-is since you're not worried about security for now
+# Anaplan credentials (Hardcoded for now)
 $ANAPLAN_USER = "jaiselvash.segar@relanto.ai"
 $ANAPLAN_PASSWORD = 'AP_#@Jai._14'
 
@@ -10,10 +11,10 @@ $WORKSPACE_ID = "8a868cdc7bd6c9ae017be5b938c83112"
 $MODEL_ID = "6E767AD07F1345D9B3E3AF6925799C8A"
 $ACTION_NAME = "Import current date"
 
-# Anaplan Connect directory - Updated for GitHub Actions
+# Anaplan Connect directory
 $ANAPLAN_CONNECT_DIR = ".\anaplan-connect-4.3.1"
 
-# Log file location - Updated for GitHub Actions
+# Log file location
 $LOG_DIR = ".\logs"
 $LOG_FILE = "$LOG_DIR\anaplan_daily_$(Get-Date -Format 'yyyy-MM-dd').log"
 
@@ -42,11 +43,21 @@ function Write-Log {
 # ------ Main Script ------
 try {
     Write-Log "Starting Anaplan daily action automation"
-    
+
+    # Debugging: Print current directory and list files
+    Write-Log "Current directory: $(Get-Location)"
+    Write-Log "Listing extracted files:"
+    Get-ChildItem -Path . -Recurse | ForEach-Object { Write-Log $_.FullName }
+
+    # Verify Anaplan Connect folder exists
+    if (!(Test-Path -Path $ANAPLAN_CONNECT_DIR)) {
+        throw "Anaplan Connect folder not found: $ANAPLAN_CONNECT_DIR"
+    }
+
     # Navigate to Anaplan Connect directory
     Set-Location -Path $ANAPLAN_CONNECT_DIR
     Write-Log "Changed directory to Anaplan Connect folder: $ANAPLAN_CONNECT_DIR"
-    
+
     # Find Java executable
     Write-Log "Finding Java path..."
     $java_path = $null
@@ -61,7 +72,7 @@ try {
     else {
         throw "Java runtime not found!"
     }
-    
+
     # Verify Java version
     $java_version = & $java_path -version 2>&1 | Select-String "version" | ForEach-Object { $_ -match '"(\d+\.\d+)' ; $matches[1] }
     if ($java_version -match "^(1\.8|11\.0|17\.0|21\.0|22\.0)$") {
@@ -70,23 +81,23 @@ try {
     else {
         throw "Unsupported Java version: $java_version. Use Java 8, 11, 17, or 21."
     }
-    
+
     # Find Anaplan Connect JAR file
     $classpathFile = Get-ChildItem "$ANAPLAN_CONNECT_DIR\anaplan-connect-*-jar-with-dependencies.jar" | 
     Sort-Object LastWriteTime -Descending | 
     Select-Object -First 1
-    
+
     if (-not $classpathFile) {
         throw "Cannot locate anaplan-connect JAR file."
     }
-    
+
     $classpath = $classpathFile.FullName
     Write-Log "Using Anaplan Connect JAR: $classpath"
-    
+
     # Execute Anaplan action
     Write-Log "Executing Anaplan action: $ACTION_NAME"
     $startTime = Get-Date
-    
+
     $result = & $java_path -classpath "$classpath" `
         com.anaplan.client.Program `
         -s "https://api.anaplan.com" `
@@ -96,15 +107,15 @@ try {
         -u "$($ANAPLAN_USER):$($ANAPLAN_PASSWORD)" `
         -i $ACTION_NAME `
         -x
-    
+
     $endTime = Get-Date
     $duration = $endTime - $startTime
-    
+
     # Log result
     Write-Log "Action completed in $($duration.TotalSeconds) seconds" 
     Write-Log "Action result: $result"
     Write-Log "Anaplan action execution completed successfully"
-    
+
     exit 0
 }
 catch {
