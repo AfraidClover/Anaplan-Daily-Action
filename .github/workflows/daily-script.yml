@@ -1,26 +1,46 @@
-name: Daily PowerShell Script
+name: Anaplan Daily Import
 
 on:
   schedule:
-    # This runs at 00:00 UTC every day
-    # Use https://crontab.guru/ to customize the schedule
-    - cron: '0 0 * * *'
-  # Optional: Allows you to manually trigger the workflow from GitHub
-  workflow_dispatch:
+    # Run every day at 1:00 UTC
+    - cron: '0 1 * * *'
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
-  run-script:
-    runs-on: windows-latest  # Use windows runner for PowerShell
+  run-anaplan-import:
+    runs-on: windows-latest  # Use Windows runner
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
-      - name: Run PowerShell script
-        shell: pwsh
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'  # Eclipse Temurin distribution
+          java-version: '17'       # Using Java 17
+      
+      - name: Download and setup Anaplan Connect
         run: |
-          # Path to your script file in the repository
-          .\AnaplanDailyAction.ps1
+          # Download Anaplan Connect
+          Invoke-WebRequest -Uri "https://cdn.anaplan.com/anaplan-connect/4.3.1/anaplan-connect-4.3.1.zip" -OutFile "anaplan-connect.zip"
           
-          # If your script needs parameters, add them like this:
-          # .\your-script-name.ps1 -Parameter1 Value1 -Parameter2 Value2
+          # Extract to a specific directory
+          Expand-Archive -Path "anaplan-connect.zip" -DestinationPath "anaplan-connect-4.3.1"
+          
+          # Create logs directory
+          New-Item -ItemType Directory -Path "logs" -Force
+        shell: pwsh
+      
+      - name: Run Anaplan script
+        run: |
+          # Run the PowerShell script
+          ./AnaplanDailyAction.ps1
+        shell: pwsh
+      
+      - name: Upload logs as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: execution-logs
+          path: logs/
+          retention-days: 7
