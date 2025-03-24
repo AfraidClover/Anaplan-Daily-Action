@@ -25,8 +25,14 @@ jobs:
           # Download Anaplan Connect
           Invoke-WebRequest -Uri "https://anaplanenablement.s3.amazonaws.com/Community/Anapedia/anaplan-connect-4.3.1.zip" -OutFile "anaplan-connect-4.3.1.zip"
           
-          # Extract to a specific directory
-          Expand-Archive -Path "anaplan-connect-4.3.1.zip" -DestinationPath "anaplan-connect-4.3.1"
+          # Extract to the current directory (to avoid nested folders)
+          Expand-Archive -Path "anaplan-connect-4.3.1.zip" -DestinationPath .
+
+          # Fix potential nested folder issue
+          if (Test-Path ".\anaplan-connect-4.3.1\anaplan-connect-4.3.1") {
+            Move-Item -Path ".\anaplan-connect-4.3.1\anaplan-connect-4.3.1\*" -Destination ".\anaplan-connect-4.3.1" -Force
+            Remove-Item -Path ".\anaplan-connect-4.3.1\anaplan-connect-4.3.1" -Recurse -Force
+          }
           
           # Create logs directory
           New-Item -ItemType Directory -Path "logs" -Force
@@ -39,7 +45,7 @@ jobs:
         shell: pwsh
       
       - name: Upload logs as artifacts
-        uses: actions/upload-artifact@v4  # Updated from v3 to v4
+        uses: actions/upload-artifact@v4
         with:
           name: execution-logs
           path: logs/
