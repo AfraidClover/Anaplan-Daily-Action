@@ -1,7 +1,7 @@
 # AnaplanDailyAction.ps1
 # This script runs an Anaplan action and logs the outcome
 # ------ Configuration ------
-# Anaplan credentials
+# Anaplan credentials - keeping as-is since you're not worried about security for now
 $ANAPLAN_USER = "jaiselvash.segar@relanto.ai"
 $ANAPLAN_PASSWORD = 'AP_#@Jai._14'
 
@@ -10,11 +10,11 @@ $WORKSPACE_ID = "8a868cdc7bd6c9ae017be5b938c83112"
 $MODEL_ID = "6E767AD07F1345D9B3E3AF6925799C8A"
 $ACTION_NAME = "Import current date"
 
-# Anaplan Connect directory
-$ANAPLAN_CONNECT_DIR = "C:\Users\Relanto\Downloads\anaplan-connect-4.3.1"
+# Anaplan Connect directory - Updated for GitHub Actions
+$ANAPLAN_CONNECT_DIR = ".\anaplan-connect-4.3.1"
 
-# Log file location
-$LOG_DIR = "C:\AnaplanAutomation\logs"
+# Log file location - Updated for GitHub Actions
+$LOG_DIR = ".\logs"
 $LOG_FILE = "$LOG_DIR\anaplan_daily_$(Get-Date -Format 'yyyy-MM-dd').log"
 
 # ------ Functions ------
