@@ -20,14 +20,21 @@ jobs:
       
       - name: Download and setup Anaplan Connect
         run: |
-          # Create Anaplan Connect folder
-          New-Item -ItemType Directory -Path "anaplan-connect-4.3.1" -Force
-
-          # Download Anaplan Connect
-          Invoke-WebRequest -Uri "https://anaplanenablement.s3.amazonaws.com/Community/Anapedia/anaplan-connect-4.3.1.zip" -OutFile "anaplan-connect-4.3.1.zip"
-          
-          # Extract to the Anaplan Connect folder
-          Expand-Archive -Path "anaplan-connect-4.3.1.zip" -DestinationPath "anaplan-connect-4.3.1"
+          # Check if Anaplan Connect folder already exists
+          if (!(Test-Path -Path "anaplan-connect-4.3.1")) {
+            Write-Host "Anaplan Connect not found. Downloading..."
+            
+            # Download Anaplan Connect
+            Invoke-WebRequest -Uri "https://anaplanenablement.s3.amazonaws.com/Community/Anapedia/anaplan-connect-4.3.1.zip" -OutFile "anaplan-connect-4.3.1.zip"
+            
+            # Extract to the Anaplan Connect folder
+            Expand-Archive -Path "anaplan-connect-4.3.1.zip" -DestinationPath "anaplan-connect-4.3.1"
+            
+            # Clean up zip file to save space
+            Remove-Item -Path "anaplan-connect-4.3.1.zip" -Force
+          } else {
+            Write-Host "Anaplan Connect already exists. Skipping download."
+          }
           
           # Debug: Show Anaplan Connect folder contents
           Write-Host "Anaplan Connect folder contents:"
