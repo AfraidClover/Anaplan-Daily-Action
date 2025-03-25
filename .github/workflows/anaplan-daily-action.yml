@@ -1,11 +1,9 @@
 name: Anaplan Daily Import
-
 on:
   schedule:
     # Run every day at 1:00 UTC
     - cron: '0 1 * * *'
   workflow_dispatch:  # Allows manual triggering
-
 jobs:
   run-anaplan-import:
     runs-on: windows-latest  # Use Windows runner
@@ -22,16 +20,34 @@ jobs:
       
       - name: Download and setup Anaplan Connect
         run: |
+          # Debug: Show current directory contents before download
+          Write-Host "Current directory contents:"
+          Get-ChildItem -Path .
+
           # Download Anaplan Connect
           Invoke-WebRequest -Uri "https://anaplanenablement.s3.amazonaws.com/Community/Anapedia/anaplan-connect-4.3.1.zip" -OutFile "anaplan-connect-4.3.1.zip"
           
-          # Extract to the current directory (to avoid nested folders)
+          # Debug: Verify the zip file was downloaded
+          if (Test-Path "anaplan-connect-4.3.1.zip") {
+            Write-Host "ZIP file downloaded successfully"
+          } else {
+            Write-Host "Failed to download ZIP file"
+            exit 1
+          }
+          
+          # Extract to the current directory
           Expand-Archive -Path "anaplan-connect-4.3.1.zip" -DestinationPath .
+          
+          # Debug: Show directory contents after extraction
+          Write-Host "Directory contents after extraction:"
+          Get-ChildItem -Path .
 
-          # Fix potential nested folder issue
-          if (Test-Path ".\anaplan-connect-4.3.1\anaplan-connect-4.3.1") {
-            Move-Item -Path ".\anaplan-connect-4.3.1\anaplan-connect-4.3.1\*" -Destination ".\anaplan-connect-4.3.1" -Force
-            Remove-Item -Path ".\anaplan-connect-4.3.1\anaplan-connect-4.3.1" -Recurse -Force
+          # Ensure Anaplan Connect folder is correctly located
+          if (Test-Path ".\anaplan-connect-4.3.1") {
+            Write-Host "Anaplan Connect folder found"
+          } else {
+            Write-Host "Anaplan Connect folder NOT found"
+            exit 1
           }
           
           # Create logs directory
