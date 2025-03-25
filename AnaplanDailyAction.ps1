@@ -14,16 +14,13 @@ function Find-AnaplanConnectDir {
     $possiblePaths = @(
         ".\anaplan-connect-4.3.1",
         "..\anaplan-connect-4.3.1",
-        "D:\a\Anaplan-Daily-Action\Anaplan-Daily-Action\anaplan-connect-4.3.1",
-        ".\*anaplan-connect*"
+        "D:\a\Anaplan-Daily-Action\Anaplan-Daily-Action\anaplan-connect-4.3.1"
     )
     
     foreach ($path in $possiblePaths) {
-        $foundDirs = Get-ChildItem -Path $path -Directory -ErrorAction SilentlyContinue
-        if ($foundDirs) {
-            $dir = $foundDirs | Select-Object -First 1
-            Write-Log "Found Anaplan Connect directory: $($dir.FullName)"
-            return $dir.FullName
+        if (Test-Path -Path $path) {
+            Write-Log "Found Anaplan Connect directory: $path"
+            return (Resolve-Path $path).Path
         }
     }
     
@@ -101,13 +98,13 @@ try {
     }
     
     # Find Anaplan Connect JAR file
-    $classpathFile = Get-ChildItem "*anaplan-connect*-jar-with-dependencies.jar" | 
+    $classpathFile = Get-ChildItem "$ANAPLAN_CONNECT_DIR\anaplan-connect-*-jar-with-dependencies.jar" | 
     Sort-Object LastWriteTime -Descending | 
     Select-Object -First 1
     
     if (-not $classpathFile) {
         Write-Log "Debug: Checking all files in directory:"
-        Get-ChildItem -Path . -Recurse | ForEach-Object { Write-Log $_.FullName }
+        Get-ChildItem -Path $ANAPLAN_CONNECT_DIR -Recurse | ForEach-Object { Write-Log $_.FullName }
         throw "Cannot locate anaplan-connect JAR file."
     }
     
