@@ -20,36 +20,18 @@ jobs:
       
       - name: Download and setup Anaplan Connect
         run: |
-          # Debug: Show all existing directories
-          Write-Host "Existing directories:"
-          Get-ChildItem -Directory | ForEach-Object { Write-Host $_.Name }
+          # Create Anaplan Connect folder
+          New-Item -ItemType Directory -Path "anaplan-connect-4.3.1" -Force
 
-          # Check for Anaplan Connect folders more flexibly
-          $anaplanFolders = Get-ChildItem -Directory | Where-Object { $_.Name -like "*anaplan-connect*" }
+          # Download Anaplan Connect
+          Invoke-WebRequest -Uri "https://anaplanenablement.s3.amazonaws.com/Community/Anapedia/anaplan-connect-4.3.1.zip" -OutFile "anaplan-connect-4.3.1.zip"
           
-          if ($anaplanFolders.Count -eq 0) {
-            Write-Host "No Anaplan Connect folder found. Downloading..."
-            
-            # Download Anaplan Connect
-            Invoke-WebRequest -Uri "https://anaplanenablement.s3.amazonaws.com/Community/Anapedia/anaplan-connect-4.3.1.zip" -OutFile "anaplan-connect-4.3.1.zip"
-            
-            # Extract to the Anaplan Connect folder
-            Expand-Archive -Path "anaplan-connect-4.3.1.zip" -DestinationPath "anaplan-connect-4.3.1"
-            
-            # Clean up zip file to save space
-            Remove-Item -Path "anaplan-connect-4.3.1.zip" -Force
-          } else {
-            Write-Host "Existing Anaplan Connect folders found:"
-            $anaplanFolders | ForEach-Object { Write-Host $_.Name }
-            Write-Host "Skipping download."
-          }
+          # Extract to the Anaplan Connect folder
+          Expand-Archive -Path "anaplan-connect-4.3.1.zip" -DestinationPath "anaplan-connect-4.3.1"
           
           # Debug: Show Anaplan Connect folder contents
           Write-Host "Anaplan Connect folder contents:"
-          Get-ChildItem -Path "." -Directory | Where-Object { $_.Name -like "*anaplan-connect*" } | ForEach-Object {
-            Write-Host "Contents of $($_.Name):"
-            Get-ChildItem -Path $_.FullName -Recurse
-          }
+          Get-ChildItem -Path "anaplan-connect-4.3.1" -Recurse
         shell: pwsh
       
       - name: Run Anaplan script
