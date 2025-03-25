@@ -1,8 +1,8 @@
 name: Anaplan Daily Import
 on:
   schedule:
-    # Run every day at 1:00 UTC
-    - cron: '0 1 * * *'
+    # Run every day at 6:30 PM UTC (12:00 AM IST)
+    - cron: '30 18 * * *'
   workflow_dispatch:  # Allows manual triggering
 jobs:
   run-anaplan-import:
